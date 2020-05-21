@@ -142,23 +142,34 @@ void calculate_print(vec_doub t, vec_doub y, std::string filename)
 
 int main()
 {
-	cout << "Sine:\n";
-
-	vec_doub t_sine{ -6, -5, -3, -2, 0, 1.5, 3, 4, 6, 7, 8 };
-
-	vec_doub y_sine;
-
-	for (size_t i = 0; i < t_sine.size(); i++)
+	try
 	{
-		y_sine.push_back(std::sin(t_sine[i]));
+		cout << "Sine:\n";
+
+		vec_doub t_sine{ -6, -5, -3, -2, 0, 1.5, 3, 4, 6, 7, 8 };
+
+		vec_doub y_sine;
+
+		for (size_t i = 0; i < t_sine.size(); i++)
+		{
+			y_sine.push_back(std::sin(t_sine[i]));
+		}
+
+		calculate_print(t_sine, y_sine, "data_sine.txt");
+
+		cout << "My example (y = x^3):\n";
+
+		vec_doub t_my{ -12, -10, -8, -7, -6, -5, -3, -2, 0, 1.5, 3, 4, 6, 7, 8, 10, 12 };
+		vec_doub y_my{ -1728, -1000, -512, -343, -216, -125, -27, -8, 0, 3.375, 27, 64, 216, 343, 512, 1000, 1728 };
+
+		calculate_print(t_my, y_my, "data_my.txt");
 	}
-
-	calculate_print(t_sine, y_sine, "data_sine.txt");
-
-	cout << "My example (y = x^3):\n";
-
-	vec_doub t_my{ -12, -10, -8, -7, -6, -5, -3, -2, 0, 1.5, 3, 4, 6, 7, 8, 10, 12 };
-	vec_doub y_my{ -1728, -1000, -512, -343, -216, -125, -27, -8, 0, 3.375, 27, 64, 216, 343, 512, 1000, 1728 };
-
-	calculate_print(t_my, y_my, "data_my.txt");
+	catch (DivisionByZeroException const& ex)
+	{
+		cout << endl << ex.what();
+	}
+	catch (NonPositiveSizeException const& ex)
+	{
+		cout << endl << ex.what();
+	}
 }
