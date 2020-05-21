@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <exception>
+#include <fstream>
 
 struct DivisionByZeroException : public std::exception
 {
@@ -82,7 +83,13 @@ void tridiag_eq(vec_doub& A, vec_doub& B, vec_doub& C, vec_doub& F, vec_doub& u)
 	}
 }
 
-void calculate_print(vec_doub t, vec_doub y)
+double function(double coef1, double coef2, double coef3, double coef4, double t_i, double t_i1, double x)
+{
+	return coef1 * std::pow(t_i1 - x, 3) + coef2 * std::pow(x - t_i, 3)
+		+ coef3 * (x - t_i) + coef4 * (t_i1 - x);
+}
+
+void calculate_print(vec_doub t, vec_doub y, std::string filename)
 {
 	vec_doub h;
 	vec_doub u;
@@ -113,13 +120,23 @@ void calculate_print(vec_doub t, vec_doub y)
 	}
 
 	cout << "Splines:\n";
+	
+	std::ofstream file{ filename };
 	for (size_t i = 0; i < t.size() - 1; i++)
 	{
-		cout << "from " << t[i] << " to " << t[i + 1] << ": " << z[i] / (6 * h[i])
-			<< "(" << t[i + 1] << " - x)^3 + " << z[i + 1] / (6 * h[i]) << "(x - "
-			<< t[i] << ")^3 + " << ((y[i + 1] / h[i]) - (z[i + 1] * h[i] / 6))
-			<< "(x - " << t[i] << ") + " << ((y[i] / h[i]) - (z[i] * h[i] / 6))
-			<< "(" << t[i + 1] << " - x)\n";
+		double coef_1 = z[i] / (6 * h[i]);
+		double coef_2 = z[i + 1] / (6 * h[i]);
+		double coef_3 = ((y[i + 1] / h[i]) - (z[i + 1] * h[i] / 6));
+		double coef_4 = ((y[i] / h[i]) - (z[i] * h[i] / 6));
+
+		cout << "from " << t[i] << " to " << t[i + 1] << ": " << coef_1 << "(" 
+			<< t[i + 1] << " - x)^3 + " << coef_2 << "(x - " << t[i] << ")^3 + " 
+			<< coef_3 << "(x - " << t[i] << ") + " << coef_4 << "(" << t[i + 1] << " - x)\n";
+
+		for (double j = t[i]; j < t[i + 1]; j += 0.01)
+		{
+			file << j << "," << function(coef_1, coef_2, coef_3, coef_4, t[i], t[i + 1], j) << endl;
+		}
 	}
 }
 
@@ -136,12 +153,12 @@ int main()
 		y_sine.push_back(std::sin(t_sine[i]));
 	}
 
-	calculate_print(t_sine, y_sine);
+	calculate_print(t_sine, y_sine, "data_sine.txt");
 
 	cout << "My example (y = x^3):\n";
 
-	vec_doub t_my{ -6, -5, -3, -2, 0, 1.5, 3, 4, 6, 7, 8 };
-	vec_doub y_my{ -216, -125, -27, -8, 0, 3.375, 27, 64, 216, 343, 512 };
+	vec_doub t_my{ -12, -10, -8, -7, -6, -5, -3, -2, 0, 1.5, 3, 4, 6, 7, 8, 10, 12 };
+	vec_doub y_my{ -1728, -1000, -512, -343, -216, -125, -27, -8, 0, 3.375, 27, 64, 216, 343, 512, 1000, 1728 };
 
-	calculate_print(t_my, y_my);
+	calculate_print(t_my, y_my, "data_my.txt");
 }
